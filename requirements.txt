@@ -1,0 +1,8 @@
+flask
+DateTime
+python-dateutil
+pymongo
+Flask-WTF
+Flask-pymongo
+Passlib
+jinja2

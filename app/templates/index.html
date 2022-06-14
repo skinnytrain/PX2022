@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script>
+function myFunction(str) {
+  var x = document.getElementById(str);
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+
+{% endblock %}
+
+{% block body %}
+<br>
+<h1>Current Status Overview</h1>
+<h2 style="color: #FF7276; font-size: 72px;">{{displaytime}}</h2>
+
+<div class="container px-4 py-3">
+<div class="row g-4 row-cols-2 row-cols-lg-5">
+    <div class="feature col">
+        <p class="tile">
+            {{nowdata["co2"]}}<sup>ppm</sup>
+            <br>
+            <span>co<sup>2</sup></span>
+
+        </p>
+    </div>
+    <div class="feature col">
+        <p class="tile">
+            {{nowdata["humidity"]}}<sup>%</sup>
+            <br>
+            <span>humidity</span>
+
+        </p>
+    </div>
+    <div class="feature col">
+        <p class="tile">
+            {{nowdata["light"]}}<sup>lm</sup>
+            <br>
+            <span>light</span>
+        </p>
+    </div>
+
+    <div class="feature col">
+        <p class="tile">
+            {% if nowdata["motion"] < 1 %}
+                none
+            {% else %}
+                detected
+            {% endif%}
+            <br>
+            <span>movement</span>
+        </p>
+    </div>
+
+    <div class="feature col">
+        <p class="tile">
+            {{nowdata["temperature"]}}<sup>&#8451;</sup>
+            <br>
+            <span>temperature</span>
+        </p>
+    </div>
+</div>
+    <br>
+
+{% if userAuthority == 'Admin' or userAuthority == 'Executive' %}
+<h1>Select Date Range for Detailed graph</h1>
+    <div>
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="fromDate">From</label>
+                <input type="date" name="fromDate" class="form-control" id="fromDate">
+            </div>
+
+            <div class="form-group">
+                <label for="toDate">To</label>
+                <input type="date" name="toDate" class="form-control" id="toDate">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+<br>
+    <br>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation" >
+        <button class="nav-link active" id="co2-tab" data-bs-toggle="tab" data-bs-target="#co2" type="button" role="tab" aria-controls="co2" aria-selected="true" >co2</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="humidity-tab" data-bs-toggle="tab" data-bs-target="#humidity" type="button" role="tab" aria-controls="humidity" aria-selected="false">humidity</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="light-tab" data-bs-toggle="tab" data-bs-target="#light" type="button" role="tab" aria-controls="light" aria-selected="false">light</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="temperature-tab" data-bs-toggle="tab" data-bs-target="#temperature" type="button" role="tab" aria-controls="temperature" aria-selected="false">temperature</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="motion-tab" data-bs-toggle="tab" data-bs-target="#motion" type="button" role="tab" aria-controls="motion" aria-selected="false">motion</button>
+    </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane" id="co2" role="tabpanel" aria-labelledby="co2-tab">
+            <canvas id="co2Chart" width="900" height="300" style="background-color:#FFBCBE;"></canvas>
+    </div>
+    <div class="tab-pane" id="humidity" role="tabpanel" aria-labelledby="humidity-tab">
+            <canvas id="humChart" width="900" height="300" style="background-color:#FFBCBE;"></canvas>
+    </div>
+    <div class="tab-pane" id="light" role="tabpanel" aria-labelledby="light-tab">
+            <canvas id="lightChart" width="900" height="300" style="background-color:#FFBCBE;"></canvas>
+    </div>
+    <div class="tab-pane" id="temperature" role="tabpanel" aria-labelledby="temperature-tab">
+            <canvas id="tempChart" width="900" height="300" style="background-color:#FFBCBE;"></canvas>
+    </div>
+    <div class="tab-pane" id="motion" role="tabpanel" aria-labelledby="motion-tab">
+            <canvas id="motionChart" width="900" height="300" style="background-color:#FFBCBE;"></canvas>
+    </div>
+</div>
+
+
+</div>
+{% endif %}
+
+    <script>
+        var ctx1 = document.getElementById("co2Chart").getContext("2d");
+        var ctx2 = document.getElementById("humChart").getContext("2d");
+        var ctx3 = document.getElementById("lightChart").getContext("2d");
+        var ctx4 = document.getElementById("tempChart").getContext("2d");
+        var ctx5 = document.getElementById("motionChart").getContext("2d");
+
+        var co2Chart = new Chart(ctx1, {
+            type: "line",
+            data: {
+                labels: {{ labels | safe }},
+                datasets: [
+                    {
+                        label: "Parts Per Million",
+                        data: {{ co2_values | safe }},
+                        fill: true,
+                        borderColor: "rgb(255, 255, 0)",
+                        borderWidth: 1,
+                        lineTension: 0.2,
+                    },
+                ]
+            }
+        });
+
+        var humChart = new Chart(ctx2, {
+            type: "line",
+            data: {
+                labels: {{ labels | safe }},
+                datasets: [
+                    {
+                        label: "Percent",
+                        data: {{ hum_values | safe }},
+                        fill: true,
+                        borderColor: "rgb(0, 125, 125)",
+                        borderWidth: 1,
+                        lineTension: 0.2,
+                    }
+                ]
+            }
+        });
+
+        var lightChart = new Chart(ctx3, {
+            type: "line",
+            data: {
+                labels: {{ labels | safe }},
+                datasets: [
+                    {
+                        label: "Lumens",
+                        data: {{ light_values | safe }},
+                        fill: true,
+                        borderColor: "rgb(192, 192, 192)",
+                        borderWidth: 1,
+                        lineTension: 0.2,
+                    }
+                ]
+            }
+        });
+
+        var tempChart = new Chart(ctx4, {
+            type: "line",
+            data: {
+                labels: {{ labels | safe }},
+                datasets: [
+                    {
+                        label: "Degrees Celsius",
+                        data: {{ temp_values | safe }},
+                        fill: true,
+                        borderColor: "rgb(192, 0, 0)",
+                        borderWidth: 1,
+                        lineTension: 0.2,
+                    }
+                ]
+            }
+        });
+
+        var motionChart = new Chart(ctx5, {
+            type: "line",
+            data: {
+                labels: {{ labels | safe }},
+                datasets: [
+                    {
+                        label: "movement",
+                        data: {{ motion_values | safe }},
+                        fill: false,
+                        borderColor: "rgb(0, 192, 0)",
+                        borderWidth: 1,
+                        lineTension: 0.2,
+                    }
+                ]
+            }
+        });
+
+    </script>
+
+{% endblock %}

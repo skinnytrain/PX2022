@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{%block body %}
+<div>
+	<label for="DatePickerFrom"> From </label><br>
+	<input type="date" id="DatePickerFrom">
+
+	<br>
+
+	<label for="DatePickerTo"> To </label><br>
+	<input type="date" id="DatePickerTo">
+
+	<br>
+</div>
+
+<div>
+	<div style="display:inline-block; width:40%;">
+		<img src="{{ url_for('static', filename='machineicon.png') }}" class="DataIcon">
+		<figcaption>Machine Data</figcaption>
+	</div>
+	<div style="display:inline-block; width:40%; border:1px;">
+		<img src="{{ url_for('static', filename='labicon.png') }}" class="DataIcon">
+		<figcaption>Lab Data</figcaption>
+	</div>
+
+</div>
+
+
+{% endblock %}
